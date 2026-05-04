@@ -1,0 +1,3 @@
+use eggs/beer/test
+
+test.test()

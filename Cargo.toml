@@ -1,0 +1,15 @@
+[package]
+name = "nest"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+camino = "1.2.2"
+git2 = "0.20.4"
+indicatif = "0.18.4"
+miette = { version = "7.6.0", features = ["fancy"] }
+owo-colors = "4.3.0"
+serde = { version = "1.0.228", features = ["derive"] }
+thiserror = "2.0.18"
+toml = "1.1.2"
+url = "2.5.8"
