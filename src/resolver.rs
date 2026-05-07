@@ -1,14 +1,14 @@
 /// Imports
 use crate::{
     bail,
-    config::{self, Egg},
+    config::{self, Egg, EggConfig, EggMeta},
     errors::Error,
     git,
 };
 use camino::Utf8PathBuf;
 use indicatif::{ProgressBar, ProgressStyle};
 use owo_colors::OwoColorize;
-use std::{env, time::Duration};
+use std::{collections::HashMap, time::Duration};
 use url::Url;
 
 /// Returns name retrieved from url
@@ -30,7 +30,7 @@ fn url_to_name(url: &str) -> String {
 
 /// Performs download of egg to path if it's not already downloaded
 /// and returns its name and config
-pub fn prepare(path: &Utf8PathBuf, url: &str) -> (String, Egg) {
+pub fn prepare(path: &Utf8PathBuf, url: &str) -> Egg {
     // Getting egg name
     let name = url_to_name(&url);
 
@@ -62,30 +62,58 @@ pub fn prepare(path: &Utf8PathBuf, url: &str) -> (String, Egg) {
     let config = config::load(&path).unwrap_or_else(|e| bail!(e));
 
     // Done!
-    (name, config)
+    Egg {
+        meta: EggMeta {
+            name,
+            url: url.to_string(),
+        },
+        config,
+        path,
+    }
 }
 
 /// Performs resolution of egg dependencies
-pub fn resolve(resolved: &mut Vec<String>, egg: Egg) {
-    // Preparing eggs directory
-    let path = Utf8PathBuf::from_path_buf(
-        env::current_dir().unwrap_or_else(|e| bail!(Error::IoError(e))),
-    )
-    .map_err(|path| Error::NonUtf8Path(path))
-    .unwrap_or_else(|e| bail!(e))
-    .join("eggs");
-
+fn _resolve(
+    path: &Utf8PathBuf,
+    resolved: &mut HashMap<String, Egg>,
+    egg: &EggConfig,
+) {
     // Iterating over dependences
-    for url in egg.dependencies {
+    for url in &egg.dependencies {
         // Preparing dependency
-        let (name, config) = prepare(&path, &url);
+        let egg = prepare(&path, &url);
 
         // Checking if not already resolved
-        if !resolved.contains(&name) {
-            bail!(Error::CircularDependency(name))
-        } else {
-            // Resolving its dependencies
-            resolve(resolved, config)
+        match resolved.get(&egg.meta.name) {
+            // If resolved already
+            Some(it) => {
+                // Checking url match
+                if it.meta.url != egg.meta.url {
+                    // If url doesn't match, raising error
+                    bail!(Error::OneNameDifferentUrls(
+                        egg.meta.name,
+                        it.meta.url.clone(),
+                        egg.meta.url
+                    ))
+                }
+            }
+            // If not resolved already
+            None => {
+                // Marking egg as resolved
+                resolved.insert(egg.meta.name.clone(), egg.clone());
+
+                // Resolving its dependencies
+                _resolve(path, resolved, &egg.config)
+            }
         }
     }
+}
+
+/// Performs resolution of egg dependencies
+pub fn resolve(path: &Utf8PathBuf, egg: &EggConfig) {
+    // Preparing eggs directory by joining cwd with `eggs`
+    let path = path.join("eggs");
+
+    // Resolving dependencies
+    _resolve(&path, &mut HashMap::new(), egg)
 }

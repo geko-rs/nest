@@ -5,14 +5,40 @@ use serde::{Deserialize, Serialize};
 use std::fs;
 
 /// Represents egg configuration
-#[derive(Serialize, Deserialize)]
-pub struct Egg {
+#[derive(Serialize, Deserialize, Clone)]
+pub struct EggConfig {
     /// Vector of dependencies
     pub dependencies: Vec<String>,
+
+    /// Main file
+    pub main: Option<String>,
+}
+
+/// Represents egg metadata
+#[derive(Serialize, Deserialize, Clone)]
+pub struct EggMeta {
+    /// Egg name
+    pub name: String,
+
+    /// Egg url
+    pub url: String,
+}
+
+/// Represents single egg
+#[derive(Clone)]
+pub struct Egg {
+    /// Egg meta info
+    pub meta: EggMeta,
+
+    /// Defines egg config
+    pub config: EggConfig,
+
+    /// Path to downloaded egg
+    pub path: Utf8PathBuf,
 }
 
 /// Reads the config
-fn read(path: &Utf8PathBuf) -> Result<Egg, Error> {
+fn read(path: &Utf8PathBuf) -> Result<EggConfig, Error> {
     let text = fs::read_to_string(path).map_err(|e| Error::IoError(e))?;
     toml::from_str(&text).map_err(|e| Error::TomlDeError(e))
 }
@@ -31,7 +57,7 @@ fn find(path: &Utf8PathBuf) -> Result<Utf8PathBuf, Error> {
 }
 
 /// Loads the config located in specified folder
-pub fn load(path: &Utf8PathBuf) -> Result<Egg, Error> {
+pub fn load(path: &Utf8PathBuf) -> Result<EggConfig, Error> {
     let path = find(path)?;
     read(&path)
 }
@@ -48,8 +74,9 @@ pub fn generate(mut path: Utf8PathBuf) -> Result<(), Error> {
     // If config not exists, generating it
     else {
         // Preparing config
-        let config = Egg {
+        let config = EggConfig {
             dependencies: Vec::new(),
+            main: Some("main.gk".to_string()),
         };
 
         // Writing config

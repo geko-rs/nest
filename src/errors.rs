@@ -39,7 +39,11 @@ pub enum Error {
     #[diagnostic(code(nest::non_ut8_path))]
     NonUtf8Path(PathBuf),
 
-    #[error("egg `{0}` depends on its own")]
-    #[diagnostic(code(nest::circular_dependency))]
-    CircularDependency(String),
+    #[error("egg `{0}` is linked with `{1}`, but not `{2}`")]
+    #[diagnostic(code(nest::one_name_different_urls))]
+    OneNameDifferentUrls(String, String, String),
+
+    #[error("no main file specified")]
+    #[diagnostic(code(nest::no_main_file_specified))]
+    NoMainFileSpecified,
 }
