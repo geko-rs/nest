@@ -34,6 +34,7 @@ pub struct Egg {
     pub config: EggConfig,
 
     /// Path to downloaded egg
+    #[allow(dead_code)]
     pub path: Utf8PathBuf,
 }
 

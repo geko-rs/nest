@@ -8,7 +8,7 @@ mod project;
 mod resolver;
 
 /// Imports
-use crate::commands::{add, clean, new, run, solve};
+use crate::commands::{add, clean, init, new, run, solve};
 use clap::{Parser, Subcommand};
 
 /// Defines CLI
@@ -45,7 +45,7 @@ fn main() {
         SubCommand::Run => run::run(),
         SubCommand::Solve => solve::run(),
         SubCommand::New { name } => new::run(name),
-        SubCommand::Init => todo!(),
+        SubCommand::Init => init::run(),
         SubCommand::Clean => clean::run(),
     }
 }
