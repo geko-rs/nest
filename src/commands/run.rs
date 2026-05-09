@@ -3,7 +3,6 @@ use crate::{bail, config, errors::Error, resolver};
 use camino::Utf8PathBuf;
 use std::{
     env,
-    io::Stderr,
     process::{Command, Stdio},
 };
 

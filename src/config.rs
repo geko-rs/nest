@@ -63,7 +63,22 @@ pub fn load(path: &Utf8PathBuf) -> Result<EggConfig, Error> {
 }
 
 /// Generates new config in specified path
-pub fn generate(mut path: Utf8PathBuf) -> Result<(), Error> {
+pub fn generate(path: Utf8PathBuf) -> Result<(), Error> {
+    // Preparing config
+    let config = EggConfig {
+        dependencies: Vec::new(),
+        main: Some("main.gk".to_string()),
+    };
+
+    // Creating `nest.toml`
+    create(path, config)
+}
+
+/// Replaces or creates `nest.toml` with provided config in specified path
+pub fn create(
+    mut path: Utf8PathBuf,
+    config: EggConfig,
+) -> Result<(), Error> {
     // Getting cwd and adding `nest.toml` suffix
     path.push("nest.toml");
 
@@ -73,12 +88,6 @@ pub fn generate(mut path: Utf8PathBuf) -> Result<(), Error> {
     }
     // If config not exists, generating it
     else {
-        // Preparing config
-        let config = EggConfig {
-            dependencies: Vec::new(),
-            main: Some("main.gk".to_string()),
-        };
-
         // Writing config
         fs::write(
             path,
