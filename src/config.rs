@@ -63,40 +63,35 @@ pub fn load(path: &Utf8PathBuf) -> Result<EggConfig, Error> {
 }
 
 /// Generates new config in specified path
-pub fn generate(path: Utf8PathBuf) -> Result<(), Error> {
+pub fn generate(
+    path: &Utf8PathBuf,
+    main: Option<String>,
+) -> Result<(), Error> {
     // Preparing config
     let config = EggConfig {
         dependencies: Vec::new(),
-        main: Some("main.gk".to_string()),
+        main: main,
     };
 
     // Creating `nest.toml`
-    create(path, config)
+    create(path, &config)
 }
 
 /// Replaces or creates `nest.toml` with provided config in specified path
 pub fn create(
-    mut path: Utf8PathBuf,
-    config: EggConfig,
+    path: &Utf8PathBuf,
+    config: &EggConfig,
 ) -> Result<(), Error> {
-    // Getting cwd and adding `nest.toml` suffix
-    path.push("nest.toml");
+    // Adding `nest.toml` suffix
+    let path = path.join("nest.toml");
 
-    // Checking existence
-    if path.exists() {
-        todo!()
-    }
-    // If config not exists, generating it
-    else {
-        // Writing config
-        fs::write(
-            path,
-            toml::to_string(&config)
-                .map_err(|e| Error::TomlSerError(e))?,
-        )
-        .map_err(|e| Error::IoError(e))?;
+    // Writing config
+    fs::write(
+        path,
+        toml::to_string(&config).map_err(|e| Error::TomlSerError(e))?,
+    )
+    .map_err(|e| Error::IoError(e))?;
 
-        // Done!
-        Ok(())
-    }
+    // Done!
+    Ok(())
 }

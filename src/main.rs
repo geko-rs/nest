@@ -4,9 +4,11 @@ mod config;
 mod errors;
 mod git;
 mod macros;
+mod project;
 mod resolver;
 
 /// Imports
+use crate::commands::{add, clean, new, run, solve};
 use clap::{Parser, Subcommand};
 
 /// Defines CLI
@@ -35,7 +37,15 @@ enum SubCommand {
     Clean,
 }
 
-///
+/// The entry point
 fn main() {
-    commands::run::run();
+    // Parsing command
+    match Cli::parse().command {
+        SubCommand::Add { url } => add::run(url),
+        SubCommand::Run => run::run(),
+        SubCommand::Solve => solve::run(),
+        SubCommand::New { name } => new::run(name),
+        SubCommand::Init => todo!(),
+        SubCommand::Clean => clean::run(),
+    }
 }

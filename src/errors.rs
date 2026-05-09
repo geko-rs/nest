@@ -46,4 +46,8 @@ pub enum Error {
     #[error("no main file specified")]
     #[diagnostic(code(nest::no_main_file_specified))]
     NoMainFileSpecified,
+
+    #[error("egg `{0}` is already in `nest.toml`")]
+    #[diagnostic(code(nest::egg_already_exists))]
+    EggAlreadyExists(String),
 }

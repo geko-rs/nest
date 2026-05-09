@@ -30,11 +30,11 @@ pub fn run() {
                 .arg(main)
                 .stdout(Stdio::inherit())
                 .stderr(Stdio::inherit())
-                .spawn()
+                .status()
             {
-                // If process spawned successfully
+                // If process executed successfully
                 Ok(_) => {}
-                // If process spawned with error
+                // If process executed with error
                 Err(err) => bail!(Error::IoError(err)),
             }
         }
